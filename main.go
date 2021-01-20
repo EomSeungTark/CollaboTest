@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
 
 	"github.com/eom/collabotest/comicDB"
@@ -55,6 +57,45 @@ func dataServe(c echo.Context) error {
 	return c.String(http.StatusOK, userList)
 }
 
+func listServe(c echo.Context) error {
+	defer c.Request().Body.Close()
+
+	noticeList := comicDB.ListLoad(db)
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	return c.String(http.StatusOK, noticeList)
+}
+
+func upload(c echo.Context) error {
+	//savepath := `C:\savedata`
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	files := form.File["files"]
+
+	for _, file := range files {
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		dst, err := os.Create(file.Filename)
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
+
+		if _, err = io.Copy(dst, src); err != nil {
+			return err
+		}
+	}
+
+	return c.String(http.StatusOK, "upload ok")
+}
+
 func main() {
 	var err error
 
@@ -77,6 +118,7 @@ func main() {
 
 	e.POST("/login/test", dataReceive)
 	e.GET("/login/getTest", dataServe)
+	e.GET("/list/getTest", listServe)
 
 	e.Start(":8000")
 }

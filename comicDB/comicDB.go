@@ -16,21 +16,39 @@ type UserInfo struct {
 	DATE     string `json:"date"`
 }
 
-func ToString(rows *sql.Rows, length int) string {
-	values := make([]UserInfo, length)
+type NoticeInfo struct {
+	TITLE   string `json:"title"`
+	CONTEXT string `json:"context"`
+	DATE    string `json:"date"`
+	SECTION string `json:"section"`
+}
 
-	fmt.Println(length)
-
+func DBToString(rows *sql.Rows, length int, flag string) string {
 	i := 0
 
-	for rows.Next() {
-		rows.Scan(&values[i].ID, &values[i].PASSWORD, &values[i].NAME, &values[i].EMAIL, &values[i].DATE)
-		i++
+	if flag == "DATA" {
+		values := make([]UserInfo, length)
+		for rows.Next() {
+			rows.Scan(&values[i].ID, &values[i].PASSWORD, &values[i].NAME, &values[i].EMAIL, &values[i].DATE)
+			i++
+		}
+		j, _ := json.Marshal(values)
+
+		return string(j)
+
+	} else if flag == "LIST" {
+		values := make([]NoticeInfo, length)
+		for rows.Next() {
+			fmt.Print(rows)
+			rows.Scan(&values[i].TITLE, &values[i].CONTEXT, &values[i].DATE, &values[i].SECTION)
+			i++
+		}
+		j, _ := json.Marshal(values)
+
+		return string(j)
 	}
 
-	j, _ := json.Marshal(values)
-
-	return string(j)
+	return "없는 플레그 입니다."
 }
 
 func DataSave(db *sql.DB, userJson UserInfo) {
@@ -54,7 +72,22 @@ func DataLoad(db *sql.DB) string {
 
 	var cnt int
 	_ = db.QueryRow(`select count(*) from users`).Scan(&cnt)
-	text := ToString(rows, cnt)
+	text := DBToString(rows, cnt, "DATA")
+
+	return text
+}
+
+func ListLoad(db *sql.DB) string {
+	getUserSql := fmt.Sprint("SELECT title, context, date, notice FROM NOTICE")
+	rows, err := db.Query(getUserSql)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var cnt int
+	_ = db.QueryRow(`select count(*) from NOTICE`).Scan(&cnt)
+	text := DBToString(rows, cnt, "LIST")
 
 	return text
 }
