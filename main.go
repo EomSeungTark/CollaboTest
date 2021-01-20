@@ -43,6 +43,7 @@ func dataReceive(c echo.Context) error {
 	}
 
 	comicDB.DataSave(db, userinfo)
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, "test ok")
 }
 
@@ -50,6 +51,7 @@ func dataServe(c echo.Context) error {
 	defer c.Request().Body.Close()
 
 	userList := comicDB.DataLoad(db)
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, userList)
 }
 
