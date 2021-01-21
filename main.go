@@ -9,7 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
+	"text/template"
 
 	"github.com/eom/collabotest/comicDB"
 	"github.com/labstack/echo"
@@ -25,6 +27,14 @@ const (
 	DB_PASSWORD = "800326"
 	DB_NAME     = "postgres"
 )
+
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, e echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
 
 func dataReceive(c echo.Context) error {
 	userinfo := comicDB.UserInfo{}
@@ -82,7 +92,8 @@ func upload(c echo.Context) error {
 		}
 		defer src.Close()
 
-		dst, err := os.Create(file.Filename)
+		mkfilepath := filepath.Join(`C:\savedata`, file.Filename)
+		dst, err := os.Create(mkfilepath)
 		if err != nil {
 			return err
 		}
@@ -94,6 +105,10 @@ func upload(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "upload ok")
+}
+
+func firstPage(c echo.Context) error {
+	return c.Render(http.StatusOK, "index.html", "")
 }
 
 func main() {
@@ -111,14 +126,21 @@ func main() {
 
 	e := echo.New()
 
+	t := &Template{
+		templates: template.Must(template.ParseGlob("public/*.html")),
+	}
+	e.Renderer = t
+
 	// g := e.Group("/login")
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host} ${path} ${latency_human}` + "\n",
 	}))
 
+	e.GET("/", firstPage)
 	e.POST("/login/test", dataReceive)
 	e.GET("/login/getTest", dataServe)
 	e.GET("/list/getTest", listServe)
+	e.POST("/file/upload", upload)
 
 	e.Start(":8000")
 }
