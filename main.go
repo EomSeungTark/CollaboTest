@@ -83,7 +83,9 @@ func upload(c echo.Context) error {
 		return err
 	}
 
+	// html파일에 file을 받는 input 태그에 name 값이 키 값과 같아야 한다.
 	files := form.File["files"]
+	fmt.Println("files is : ", files)
 
 	for _, file := range files {
 		src, err := file.Open()
@@ -93,6 +95,7 @@ func upload(c echo.Context) error {
 		defer src.Close()
 
 		mkfilepath := filepath.Join(`C:\savedata`, file.Filename)
+		fmt.Println("path is : ", mkfilepath)
 		dst, err := os.Create(mkfilepath)
 		if err != nil {
 			return err
@@ -140,7 +143,7 @@ func main() {
 	e.POST("/login/test", dataReceive)
 	e.GET("/login/getTest", dataServe)
 	e.GET("/list/getTest", listServe)
-	e.POST("/file/upload", upload)
+	e.POST("/upload", upload)
 
 	e.Start(":8000")
 }
