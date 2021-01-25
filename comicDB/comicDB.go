@@ -17,14 +17,17 @@ type UserInfo struct {
 }
 
 type NoticeInfo struct {
-	TITLE   string `json:"title"`
-	CONTEXT string `json:"context"`
-	DATE    string `json:"date"`
-	SECTION string `json:"section"`
+	SID       string `json:"sid"`
+	TITLE     string `json:"title"`
+	CONTEXT   string `json:"context"`
+	USERID    string `json:"user_id"`
+	DATE      string `json:"date"`
+	VIEWCOUNT string `json:"view_count"`
+	SECTION   string `json:"section"`
 }
 
 func DBToString(rows *sql.Rows, length int, flag string) string {
-	i := 0
+	var i int = 0
 
 	if flag == "DATA" {
 		values := make([]UserInfo, length)
@@ -36,11 +39,10 @@ func DBToString(rows *sql.Rows, length int, flag string) string {
 
 		return string(j)
 
-	} else if flag == "LIST" {
+	} else if flag == "NOTICE" {
 		values := make([]NoticeInfo, length)
 		for rows.Next() {
-			fmt.Print(rows)
-			rows.Scan(&values[i].TITLE, &values[i].CONTEXT, &values[i].DATE, &values[i].SECTION)
+			rows.Scan(&values[i].SID, &values[i].TITLE, &values[i].CONTEXT, &values[i].USERID, &values[i].DATE, &values[i].VIEWCOUNT, &values[i].SECTION)
 			i++
 		}
 		j, _ := json.Marshal(values)
@@ -78,7 +80,7 @@ func DataLoad(db *sql.DB) string {
 }
 
 func ListLoad(db *sql.DB) string {
-	getUserSql := fmt.Sprint("SELECT title, context, date, notice FROM NOTICE")
+	getUserSql := fmt.Sprint("SELECT * FROM NOTICE")
 	rows, err := db.Query(getUserSql)
 	if err != nil {
 		log.Fatal(err)
@@ -87,7 +89,7 @@ func ListLoad(db *sql.DB) string {
 
 	var cnt int
 	_ = db.QueryRow(`select count(*) from NOTICE`).Scan(&cnt)
-	text := DBToString(rows, cnt, "LIST")
+	text := DBToString(rows, cnt, "NOTICE")
 
 	return text
 }

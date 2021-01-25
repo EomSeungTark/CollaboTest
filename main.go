@@ -76,8 +76,6 @@ func listServe(c echo.Context) error {
 }
 
 func upload(c echo.Context) error {
-	//savepath := `C:\savedata`
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		return err
@@ -108,6 +106,30 @@ func upload(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "upload ok")
+}
+
+func getFiles(c echo.Context, file string) {
+	fmt.Println(file)
+	c.Attachment(file, file)
+}
+
+func fileDownload(c echo.Context) error {
+	directory := `C:\savedata`
+	var files []string
+
+	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, fileName := range files {
+		getFiles(c, fileName)
+	}
+
+	return c.String(http.StatusOK, "download ok")
 }
 
 func firstPage(c echo.Context) error {
@@ -144,6 +166,7 @@ func main() {
 	e.GET("/login/getTest", dataServe)
 	e.GET("/list/getTest", listServe)
 	e.POST("/upload", upload)
+	e.GET("/download", fileDownload)
 
 	e.Start(":8000")
 }
