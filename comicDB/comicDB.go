@@ -80,7 +80,7 @@ func DataLoad(db *sql.DB) string {
 }
 
 func ListLoad(db *sql.DB) string {
-	getUserSql := fmt.Sprint("SELECT * FROM NOTICE")
+	getUserSql := fmt.Sprint("SELECT * FROM NOTICE ORDER BY SECTION DESC, DATE DESC")
 	rows, err := db.Query(getUserSql)
 	if err != nil {
 		log.Fatal(err)
