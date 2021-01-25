@@ -75,6 +75,14 @@ func listServe(c echo.Context) error {
 	return c.String(http.StatusOK, noticeList)
 }
 
+func listSize(c echo.Context) error {
+	defer c.Request().Body.Close()
+
+	noticeSize := comicDB.ListSize(db)
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	return c.String(http.StatusOK, noticeSize)
+}
+
 func upload(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -165,6 +173,7 @@ func main() {
 	e.POST("/login/test", dataReceive)
 	e.GET("/login/getTest", dataServe)
 	e.GET("/list/getTest", listServe)
+	e.GET("/list/getSize", listSize)
 	e.POST("/upload", upload)
 	e.GET("/download", fileDownload)
 

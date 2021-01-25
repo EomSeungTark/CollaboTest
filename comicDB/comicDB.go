@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -92,4 +93,11 @@ func ListLoad(db *sql.DB) string {
 	text := DBToString(rows, cnt, "NOTICE")
 
 	return text
+}
+
+func ListSize(db *sql.DB) string {
+	var cnt int
+	_ = db.QueryRow(`select count(*) from NOTICE`).Scan(&cnt)
+
+	return strconv.Itoa(cnt)
 }
