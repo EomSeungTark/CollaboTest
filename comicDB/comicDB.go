@@ -49,6 +49,15 @@ func DBToString(rows *sql.Rows, length int, flag string) string {
 		j, _ := json.Marshal(values)
 
 		return string(j)
+	} else if flag == "NOTICE_ONE" {
+		value := NoticeInfo{}
+		for rows.Next() {
+			rows.Scan(&value.SID, &value.TITLE, &value.CONTEXT, &value.USERID, &value.DATE, &value.VIEWCOUNT, &value.SECTION)
+			i++
+		}
+		j, _ := json.Marshal(value)
+
+		return string(j)
 	}
 
 	return "없는 플레그 입니다."
@@ -100,4 +109,20 @@ func ListSize(db *sql.DB) string {
 	_ = db.QueryRow(`select count(*) from NOTICE`).Scan(&cnt)
 
 	return strconv.Itoa(cnt)
+}
+
+func ListContext(db *sql.DB, sid string) string {
+	sqlState := fmt.Sprintf("update notice set VIEW_COUNT=VIEW_COUNT+1 where SID=%s", sid)
+	_, _ = db.Query(sqlState)
+
+	getUserSql := fmt.Sprintf("SELECT * FROM NOTICE WHERE SID=%s", sid)
+	rows, err := db.Query(getUserSql)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	text := DBToString(rows, 1, "NOTICE_ONE")
+
+	return text
 }

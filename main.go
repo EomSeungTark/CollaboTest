@@ -83,6 +83,23 @@ func listSize(c echo.Context) error {
 	return c.String(http.StatusOK, noticeSize)
 }
 
+func listContext(c echo.Context) error {
+	defer c.Request().Body.Close()
+
+	sid := c.Param("sid")
+	noticeContext := comicDB.ListContext(db, sid)
+
+	var li comicDB.NoticeInfo
+	json.Unmarshal([]byte(noticeContext), &li)
+	fmt.Println(li.SID)
+
+	if li.SID != "" {
+		return c.String(http.StatusOK, noticeContext)
+	} else {
+		return c.String(http.StatusBadRequest, noticeContext)
+	}
+}
+
 func upload(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -173,6 +190,7 @@ func main() {
 	e.POST("/login/test", dataReceive)
 	e.GET("/login/getTest", dataServe)
 	e.GET("/list/getTest", listServe)
+	e.GET("/list/getTest/:sid", listContext)
 	e.GET("/list/getSize", listSize)
 	e.POST("/upload", upload)
 	e.GET("/download", fileDownload)
