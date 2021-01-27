@@ -107,8 +107,8 @@ func listCreate(c echo.Context) error {
 	defer c.Request().Body.Close()
 
 	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
-	headers.Set("Access-Control-Allow-Headers", "Authorization")
-	headers.Set("Access-Control-Allow-Methods", "GET, PATCH, PUT, POST, DELETE, OPTIONS")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Methods", "GET, PATCH, PUT, POST, DELETE, OPTIONS")
 	if err := c.Bind(u); err != nil {
 		// fmt.Println(u)
 		return c.String(http.StatusBadRequest, "return not ok")
