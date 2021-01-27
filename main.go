@@ -93,6 +93,7 @@ func listContext(c echo.Context) error {
 	json.Unmarshal([]byte(noticeContext), &li)
 	fmt.Println(li.SID)
 
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	if li.SID != "" {
 		return c.String(http.StatusOK, noticeContext)
 	} else {
@@ -111,6 +112,7 @@ func listCreate(c echo.Context) error {
 	}
 	result := comicDB.ListCreate(db, u)
 
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	if result == "true" {
 		return c.String(http.StatusOK, "return ok")
 	} else {
