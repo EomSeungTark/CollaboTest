@@ -106,13 +106,13 @@ func listCreate(c echo.Context) error {
 
 	defer c.Request().Body.Close()
 
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	if err := c.Bind(u); err != nil {
 		// fmt.Println(u)
 		return c.String(http.StatusBadRequest, "return not ok")
 	}
 	result := comicDB.ListCreate(db, u)
 
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	if result == "true" {
 		return c.String(http.StatusOK, "return ok")
 	} else {
