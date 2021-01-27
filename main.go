@@ -100,6 +100,24 @@ func listContext(c echo.Context) error {
 	}
 }
 
+func listCreate(c echo.Context) error {
+	u := new(comicDB.NoticeInfo)
+
+	defer c.Request().Body.Close()
+
+	if err := c.Bind(u); err != nil {
+		// fmt.Println(u)
+		return c.String(http.StatusBadRequest, "return not ok")
+	}
+	result := comicDB.ListCreate(db, u)
+
+	if result == "true" {
+		return c.String(http.StatusOK, "return ok")
+	} else {
+		return c.String(http.StatusBadRequest, "create fail")
+	}
+}
+
 func upload(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -194,6 +212,7 @@ func main() {
 	e.GET("/list/getSize", listSize)
 	e.POST("/upload", upload)
 	e.GET("/download", fileDownload)
+	e.POST("/list/setTest", listCreate)
 
 	e.Start(":8000")
 }

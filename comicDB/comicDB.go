@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -125,4 +126,20 @@ func ListContext(db *sql.DB, sid string) string {
 	text := DBToString(rows, 1, "NOTICE_ONE")
 
 	return text
+}
+
+func ListCreate(db *sql.DB, data *NoticeInfo) string {
+	t := time.Now()
+	formatted := fmt.Sprintf("%d-%02d-%02d-%02d-%02d-%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+
+	sqlState := fmt.Sprintf("INSERT INTO NOTICE (TITLE, CONTEXT, USER_ID, DATE, VIEW_COUNT, SECTION) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", data.TITLE, data.CONTEXT, data.USERID, formatted, "0", strings.ToUpper(data.SECTION))
+	rows, err := db.Query(sqlState)
+	if err != nil {
+		return "fail"
+	}
+
+	defer rows.Close()
+	return "true"
 }
