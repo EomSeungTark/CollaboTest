@@ -55,7 +55,7 @@ func dataReceive(c echo.Context) error {
 	}
 
 	comicDB.DataSave(db, userinfo)
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, "test ok")
 }
 
@@ -63,7 +63,7 @@ func dataServe(c echo.Context) error {
 	defer c.Request().Body.Close()
 
 	userList := comicDB.DataLoad(db)
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, userList)
 }
 
@@ -71,7 +71,7 @@ func listServe(c echo.Context) error {
 	defer c.Request().Body.Close()
 
 	noticeList := comicDB.ListLoad(db)
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, noticeList)
 }
 
@@ -79,7 +79,7 @@ func listSize(c echo.Context) error {
 	defer c.Request().Body.Close()
 
 	noticeSize := comicDB.ListSize(db)
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.String(http.StatusOK, noticeSize)
 }
 
@@ -93,7 +93,7 @@ func listContext(c echo.Context) error {
 	json.Unmarshal([]byte(noticeContext), &li)
 	fmt.Println(li.SID)
 
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	if li.SID != "" {
 		return c.String(http.StatusOK, noticeContext)
 	} else {
@@ -106,9 +106,9 @@ func listCreate(c echo.Context) error {
 
 	defer c.Request().Body.Close()
 
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
-	// c.Response().Header().Set("Access-Control-Allow-Headers", "Authorization") // 의심 됨
-	c.Response().Header().Set("Access-Control-Allow-Methods", "GET, PATCH, PUT, POST, DELETE, OPTIONS")
+	// c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Response().Header().Set("Access-Control-Allow-Headers", "Authorization, access-control-allow-origin, access-control-allow-headers")
+	// c.Response().Header().Set("Access-Control-Allow-Methods", "GET, PATCH, PUT, POST, DELETE, OPTIONS")
 	if err := c.Bind(u); err != nil {
 		// fmt.Println(u)
 		return c.String(http.StatusBadRequest, "return not ok")
@@ -203,6 +203,8 @@ func main() {
 	}
 	e.Renderer = t
 
+	e.Use(middleware.CORS())
+	// e.Use(AuthenticationMiddleware())
 	// g := e.Group("/login")
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host} ${path} ${latency_human}` + "\n",
